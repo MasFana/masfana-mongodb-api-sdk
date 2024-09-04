@@ -1,0 +1,29 @@
+{
+  "name": "masfana-mongodb-api-sdk",
+"version": "1.0.0", 
+  "description": "A TypeScript SDK for MongoDB Atlas Data API with query operator IntelliSense.",
+  "main": "dist/index.js", 
+  "types": "dist/index.d.ts", 
+  "scripts": {
+    "build": "tsc" 
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MasFana/masfana-mongodb-api-sdk"
+  },
+  "keywords": [
+    "mongodb",
+    "sdk",
+    "typescript",
+    "data api",
+    "cloudflare",
+    "workers",
+    "serverless",
+    "masfana"
+  ],
+  "author": "MasFana",
+  "license": "MIT", 
+  "devDependencies": {
+    "typescript": "^4.7.0" 
+  }
+}

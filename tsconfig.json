@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es6",
+    "outDir": "dist", // Compiled files will be output to the "dist" folder
+    "declaration": true, // Generate declaration files for TypeScript
+    "strict": true
+  },
+  "include": [
+    "src/**/*.ts" // Include all TypeScript files in the "src" directory
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
