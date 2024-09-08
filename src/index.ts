@@ -11,7 +11,7 @@ type MongoDBEnv = {
 
 /**
  * MongoDB query filter structure with IntelliSense support for common MongoDB query operators.
- * 
+ *
  * @example
  * ```typescript
  * const filter: MongoDBFilter<Task> = {
@@ -147,7 +147,11 @@ type FindOneResponse<T> = { document: T | null };
 type FindManyResponse<T> = { documents: T[] };
 type InsertOneResponse = { insertedId: string };
 type InsertManyResponse = { insertedIds: string[] };
-type UpdateResponse = { matchedCount: number; modifiedCount: number; upsertedId?: string };
+type UpdateResponse = {
+  matchedCount: number;
+  modifiedCount: number;
+  upsertedId?: string;
+};
 type DeleteResponse = { deletedCount: number };
 type AggregateResponse<T> = { documents: T[] };
 
@@ -173,13 +177,14 @@ export class MongoDBAPI<T> {
    * @returns The response from the API.
    */
   private async makeRequest<R>(endpoint: string, body: object): Promise<R> {
+    const transformedBody = this.transformFilter(body);
     const response = await fetch(`${this.env.MONGO_API_URL}/${endpoint}`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'api-key': this.env.MONGO_API_KEY,
+        "Content-Type": "application/json",
+        "api-key": this.env.MONGO_API_KEY,
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(transformedBody),
     });
 
     if (!response.ok) {
@@ -187,6 +192,23 @@ export class MongoDBAPI<T> {
     }
 
     return response.json();
+  }
+  /**
+   * Transforms a filter to ensure the `_id` field uses the `$oid` format if it's present.
+   * @param body - The request body containing the filter.
+   * @returns The transformed request body with the `_id` field in the correct format.
+   */
+  private transformFilter(body: any): any {
+    if (body?.filter?._id && typeof body.filter._id === "string") {
+      return {
+        ...body,
+        filter: {
+          ...body.filter,
+          _id: { $oid: body.filter._id },
+        },
+      };
+    }
+    return body;
   }
 
   /**
@@ -199,7 +221,10 @@ export class MongoDBAPI<T> {
    * const task = await mongoAPI.findOne({ status: { $eq: "complete" } });
    * ```
    */
-  async findOne(filter: MongoDBFilter<T>, projection?: MongoDBProjection<T>): Promise<FindOneResponse<T>> {
+  async findOne(
+    filter: MongoDBFilter<T>,
+    projection?: MongoDBProjection<T>
+  ): Promise<FindOneResponse<T>> {
     const body = {
       dataSource: this.env.DATA_SOURCE,
       database: this.env.DATABASE,
@@ -208,7 +233,7 @@ export class MongoDBAPI<T> {
       projection: projection,
     };
 
-    return this.makeRequest<FindOneResponse<T>>('action/findOne', body);
+    return this.makeRequest<FindOneResponse<T>>("action/findOne", body);
   }
 
   /**
@@ -247,7 +272,7 @@ export class MongoDBAPI<T> {
       skip,
     };
 
-    return this.makeRequest<FindManyResponse<T>>('action/find', body);
+    return this.makeRequest<FindManyResponse<T>>("action/find", body);
   }
 
   /**
@@ -268,7 +293,7 @@ export class MongoDBAPI<T> {
       document,
     };
 
-    return this.makeRequest<InsertOneResponse>('action/insertOne', body);
+    return this.makeRequest<InsertOneResponse>("action/insertOne", body);
   }
 
   /**
@@ -289,7 +314,7 @@ export class MongoDBAPI<T> {
       documents,
     };
 
-    return this.makeRequest<InsertManyResponse>('action/insertMany', body);
+    return this.makeRequest<InsertManyResponse>("action/insertMany", body);
   }
 
   /**
@@ -304,7 +329,11 @@ export class MongoDBAPI<T> {
    * console.log(result.modifiedCount);
    * ```
    */
-  async updateOne(filter: MongoDBFilter<T>, update: Partial<T>, upsert: boolean = false): Promise<UpdateResponse> {
+  async updateOne(
+    filter: MongoDBFilter<T>,
+    update: Partial<T>,
+    upsert: boolean = false
+  ): Promise<UpdateResponse> {
     const body = {
       dataSource: this.env.DATA_SOURCE,
       database: this.env.DATABASE,
@@ -314,7 +343,7 @@ export class MongoDBAPI<T> {
       upsert,
     };
 
-    return this.makeRequest<UpdateResponse>('action/updateOne', body);
+    return this.makeRequest<UpdateResponse>("action/updateOne", body);
   }
 
   /**
@@ -335,7 +364,7 @@ export class MongoDBAPI<T> {
       filter,
     };
 
-    return this.makeRequest<DeleteResponse>('action/deleteOne', body);
+    return this.makeRequest<DeleteResponse>("action/deleteOne", body);
   }
 
   /**
@@ -359,6 +388,6 @@ export class MongoDBAPI<T> {
       pipeline,
     };
 
-    return this.makeRequest<AggregateResponse<T>>('action/aggregate', body);
+    return this.makeRequest<AggregateResponse<T>>("action/aggregate", body);
   }
 }
